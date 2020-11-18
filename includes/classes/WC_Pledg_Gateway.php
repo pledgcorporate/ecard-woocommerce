@@ -100,10 +100,10 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                     },
                     // the function which triggers the payment
                     onSuccess: function (resultpayment) {console.log(resultpayment);
-                        if (resultpayment.transaction === undefined) {
+                        if (resultpayment.purchase === undefined) {
                             jQuery(\'input[name="pledg'. $this->id . '"]\').val(resultpayment.uid);
                         } else {
-                            jQuery(\'input[name="pledg'. $this->id . '"]\').val(resultpayment.transaction.id);
+                            jQuery(\'input[name="pledg'. $this->id . '"]\').val(resultpayment.purchase.reference);
                         }
                         
                         jQuery(\'form[name="checkout"]\').submit();
