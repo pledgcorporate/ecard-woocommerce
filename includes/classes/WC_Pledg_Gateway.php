@@ -88,7 +88,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                     // the shipping address (optional, to improve anti-fraud)
                     address: {
                         street:  jQuery("#billing_address_1").val() + " " + jQuery("#billing_address_2").val(),
-                        city: jQuery("#billing_address_1").val() + " " + jQuery("#billing_address_2").val(),
+                        city: jQuery("#billing_city").val(),
                         zipcode: jQuery("#billing_postcode").val(),
                         stateProvince: "",
                         country: jQuery("#billing_country").val()
