@@ -40,11 +40,23 @@ jQuery(function(){
             document.querySelector("#place_order").disabled = false;
             document.querySelector("#place_order").type = "submit";
         }
+        else if (!isFormComplete()){
+            document.querySelector("#place_order").disabled = true;
+        }
     });
     jQuery(document).on( 'click', '#place_order', function(e){
         if(pledgGateways.includes(jQuery('form[name="checkout"] input[name="payment_method"]:checked').val())) {
             window['pledg'+jQuery('form[name="checkout"] input[name="payment_method"]:checked').val()].validateCheckout();
             document.querySelector("#place_order").disabled = true;
+        }
+    });
+    jQuery( 'form.checkout' ).on( 'validate change', function(e) {
+		if(e.target.name != 'payment_method'){
+            if(isFormComplete()){
+                jQuery( document.body ).trigger( 'update_checkout');
+            }else{
+                jQuery('.pledg-iframe-wrapper').html('<div class=\'woocommerce-error\'>Merci de compléter vos informations personnelles</div>');
+            }
         }
     });
 });
