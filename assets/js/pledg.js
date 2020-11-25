@@ -51,7 +51,7 @@ jQuery(function(){
         }
     });
     jQuery( 'form.checkout' ).on( 'validate change', function(e) {
-		if(e.target.name != 'payment_method'){
+	if(isFormField(e.target.name)){
             if(isFormComplete()){
                 jQuery( document.body ).trigger( 'update_checkout');
             }else{
@@ -72,6 +72,23 @@ function isFormComplete() {
         requiredShippingFields.forEach((item, index) => {
             if (jQuery('#' + item).val() == '') {
                 flag = false
+            }
+        });
+    }
+    return flag;
+}
+
+function isFormField(name) {
+    var flag = false;
+    requiredFields.forEach((item, index) => {
+        if (item == name) {
+            flag = true;
+        }
+    });
+    if (jQuery('#ship-to-different-address-checkbox').prop('checked')) {
+        requiredShippingFields.forEach((item, index) => {
+            if (item == name) {
+                flag = true
             }
         });
     }
