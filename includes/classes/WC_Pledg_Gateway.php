@@ -75,7 +75,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                     // the amount **in cents** of the purchase
                     amountCents: '.$total.',
                     // the title of the purchase
-                    title: "'.( ($title)? implode(', ', $title) : '' ).'",
+                    title: "'.addslashes( ($title)? implode(', ', $title) : '' ).'",
                     email: jQuery("#billing_email").val(),
                     // the subtitle of the purchase
                     // the reference of the purchase
