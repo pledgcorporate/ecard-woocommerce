@@ -25,7 +25,9 @@ var requiredFieldsFlat = '';
 
 jQuery(function(){
     jQuery( document.body ).on( 'updated_checkout updated_shipping_method init_checkout payment_method_selected', function(e) {
-
+	jQuery('input[id^="payment_method_pledg"]').on('click', function(){
+		jQuery("label[for='payment_method_"+jQuery('form[name="checkout"] input[name="payment_method"]:checked').val()+"']").trigger('click');
+	});
     });
     jQuery( document.body ).on( 'updated_checkout', function(e) {
         if(pledgGateways.includes(jQuery('form[name="checkout"] input[name="payment_method"]:checked').val())) {
