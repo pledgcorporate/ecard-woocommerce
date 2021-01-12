@@ -27,6 +27,60 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
     }
 
+    private function create_metadata() {
+		$metadata = [];
+		
+		try
+		{
+			// Delivery
+			foreach ( WC()->cart->get_shipping_packages() as $package_id => $package ) {
+				// Check if a shipping for the current package exist
+				if ( WC()->session->__isset( 'shipping_for_package_'.$package_id ) ) {
+					// Loop through shipping rates for the current package
+					foreach ( WC()->session->get( 'shipping_for_package_'.$package_id )['rates'] as $shipping_rate_id => $shipping_rate ) {
+						if( WC()->session->get('chosen_shipping_methods')[0] == $shipping_rate_id ){
+							$metadata['delivery_mode'] = $shipping_rate->get_method_id() == 'local_pickup' ? 'relay' : 'home'; 
+							$metadata['delivery_speed'] = 0;
+							$metadata['delivery_label'] = $shipping_rate->get_label();
+							$metadata['delivery_cost'] = $shipping_rate->get_cost();
+							$metadata['delivery_tax_cost'] = $shipping_rate->get_shipping_tax();
+						}
+					}
+				}
+			}
+			
+			// Products
+			$md_products = [];
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$md_product = [];
+				
+				$product =  wc_get_product( $cart_item['data']->get_id());
+				$md_product['reference'] = $product->get_id();
+				$md_product['type'] = $product->get_virtual() == false ? 'physical' : 'virtual';
+				$md_product['quantity'] = $cart_item['quantity'];
+				$md_product['name'] = $product->get_name();
+				$md_product['description'] = $product->get_short_description();
+				$md_product['unit_amount_cents'] = $cart_item['data']->get_price();
+				$md_product['category'] = '';
+				$md_product['slug'] = $product->get_slug();
+								
+				$md_merchant_data = [];
+				$md_merchant_data['category_path'] = '';
+				$md_merchant_data['global_trade_item_number'] = '';
+				$md_merchant_data['manufacturer_part_number'] = '';
+				$md_merchant_data['brand'] = '';
+
+				$md_product['merchant_data'] = $md_merchant_data;
+				array_push($md_products, $md_product);
+			}
+			$metadata['products'] = $md_products;
+		}
+		catch (Exception $exp) {
+			wc_get_logger()->error( 'pledg_create_metadata - exception : '.$exp->getMessage(), array( 'source' => 'pledg_woocommerce' ) );
+		}
+		return json_encode($metadata);
+	}
+
     public function payment_fields() {
         global $wp;
         $user                 = wp_get_current_user();
@@ -37,6 +91,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
         $description          = ! empty( $description ) ? $description : '';
         $firstname            = '';
         $lastname             = '';
+        $site_name            = get_bloginfo( 'name' );
 
 
         $items = WC()->cart->get_cart();
@@ -76,6 +131,17 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                     amountCents: '.$total.',
                     // the title of the purchase
                     title: "'.addslashes( ($title)? implode(', ', $title) : '' ).'",
+                    // the subtitle of the purchase
+                    subtitle : "'.addslashes($site_name).'",
+                    // the currency of the purchase
+					currency : "'.get_woocommerce_currency().'",
+					// the lang of the user
+					lang : "'.get_locale().'",
+					// the country code of the user
+					country_code : jQuery("#billing_country").val(),
+					// the metadata of the purchase
+					metadata: JSON.parse("'.addslashes($this->create_metadata()).'"),
+					// the email of the user
                     email: jQuery("#billing_email").val(),
                     // the subtitle of the purchase
                     // the reference of the purchase
@@ -93,6 +159,13 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                         stateProvince: "",
                         country: jQuery("#billing_country").val()
                     },
+                    shippingAddress: {
+						street:  jQuery("#shipping_address_1").val() + " " + jQuery("#shipping_address_2").val(),
+                        city: jQuery("#shipping_city").val(),
+                        zipcode: jQuery("#shipping_postcode").val(),
+                        stateProvince: "",
+                        country: jQuery("#shipping_country").val()
+					},
                     externalCheckoutValidation: true,
                     showCloseButton: false,
                     onCheckoutFormStatusChange: function(readiness){
