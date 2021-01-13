@@ -59,18 +59,18 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 				$md_product['type'] = $product->get_virtual() == false ? 'physical' : 'virtual';
 				$md_product['quantity'] = $cart_item['quantity'];
 				$md_product['name'] = $product->get_name();
-				$md_product['description'] = $product->get_short_description();
-				$md_product['unit_amount_cents'] = $cart_item['data']->get_price();
+				//$md_product['description'] = $product->get_short_description();
+				$md_product['unit_amount_cents'] = $cart_item['data']->get_price() * 100;
 				$md_product['category'] = '';
 				$md_product['slug'] = $product->get_slug();
 								
-				$md_merchant_data = [];
+				/*$md_merchant_data = [];
 				$md_merchant_data['category_path'] = '';
 				$md_merchant_data['global_trade_item_number'] = '';
 				$md_merchant_data['manufacturer_part_number'] = '';
 				$md_merchant_data['brand'] = '';
 
-				$md_product['merchant_data'] = $md_merchant_data;
+				$md_product['merchant_data'] = $md_merchant_data;*/
 				array_push($md_products, $md_product);
 			}
 			$metadata['products'] = $md_products;
