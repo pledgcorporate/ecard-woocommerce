@@ -1,14 +1,41 @@
 <?php
 
+use Firebase\JWT\JWT;
+
+/**
+ * Pledg Payment Gateway
+ *
+ * Provides a form based Gateway for Pledg pyament solution to WooCommerce
+ *
+ * @class       WC_Pledg_Gateway
+ * @extends     WC_Payment_Gateway
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
-    public function __construct() {
+    /**
+	 * Minimum transaction amount, zero does not define a minimum.
+	 *
+	 * @var int
+	 */
+	public $min_amount = 0;
 
-        //$this->icon = '/wp-content/plugins/woocommerce-pledg/logo.png';
+    /**
+     * Languages for Title and Description
+     */
+    public $langs =  array('fr', 'en', 'de', 'es', 'it', 'nl');
+
+    public function __construct() {
+        $this->icon = ($this->get_option( 'logo' )==='') ? WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL . 'logo.jpg' : $this->get_option( 'logo' ) ;
         $this->has_fields = true;
+        $this->min_amount = $this->get_option('minAmount');
+        $this->max_amount = $this->get_option('maxAmount');
         $this->method_title = 'Pledg';
-        $this->method_description = ( ($this->get_option( 'description' ) ) ? $this->get_option( 'description' ) : 'Le paiement en plusieurs fois, simple et accessible.');
+        $this->method_description = ( ($this->get_option( 'description' ) ) ? $this->get_option( 'description' ) : __('Instalment payment, simple and accessible.', 'woocommerce-pledg'));
 
         $this->supports = array(
             'products'
@@ -16,20 +43,25 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
         $this->init_form_fields();
         $this->init_settings();
+        if(in_array(substr(get_locale(), 0, 2), $this->langs)){
+            $this->title = $this->get_option( 'title_'.substr(get_locale(), 0, 2) );
+            $this->description = $this->get_option( 'description_'.substr(get_locale(), 0, 2) );
+        }
+        else {
+            $this->title = $this->get_option( 'title_en' );
+            $this->description = $this->get_option( 'description_en' );
+        }
 
-        $this->title = $this->get_option( 'title' );
-        $this->description = $this->get_option( 'description' );
-
-        add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
-
-        add_action( 'woocommerce_api_wc_gateway_pledg', array( $this, 'check_ipn_response' ) );
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
     }
 
+    /**
+     *  Function to create metadata
+     */
     private function create_metadata() {
-		$metadata = [];
-		
+        $metadata = [];
+		$metadata['plugin'] = 'woocommerce-pledg-plugin' . get_file_data(WOOCOMMERCE_PLEDG_PLUGIN_DIR . "woocommerce-pledg.php", array('version' => 'version'))['version'];
 		try
 		{
 			// Delivery
@@ -59,18 +91,9 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 				$md_product['type'] = $product->get_virtual() == false ? 'physical' : 'virtual';
 				$md_product['quantity'] = $cart_item['quantity'];
 				$md_product['name'] = $product->get_name();
-				//$md_product['description'] = $product->get_short_description();
-				$md_product['unit_amount_cents'] = $cart_item['data']->get_price() * 100;
+				$md_product['unit_amount_cents'] = intval($cart_item['data']->get_price() * 100);
 				$md_product['category'] = '';
 				$md_product['slug'] = $product->get_slug();
-								
-				/*$md_merchant_data = [];
-				$md_merchant_data['category_path'] = '';
-				$md_merchant_data['global_trade_item_number'] = '';
-				$md_merchant_data['manufacturer_part_number'] = '';
-				$md_merchant_data['brand'] = '';
-
-				$md_product['merchant_data'] = $md_merchant_data;*/
 				array_push($md_products, $md_product);
 			}
 			$metadata['products'] = $md_products;
@@ -78,212 +101,225 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 		catch (Exception $exp) {
 			wc_get_logger()->error( 'pledg_create_metadata - exception : '.$exp->getMessage(), array( 'source' => 'pledg_woocommerce' ) );
 		}
-		return json_encode($metadata);
+		return $metadata;
 	}
 
-    public function payment_fields() {
-        global $wp;
-        $user                 = wp_get_current_user();
-        $display_tokenization = $this->supports( 'tokenization' ) && is_checkout() && $this->saved_cards;
-        $total                = WC()->cart->total * 100;
-        $user_email           = '';
-        $description          = $this->get_description();
-        $description          = ! empty( $description ) ? $description : '';
-        $firstname            = '';
-        $lastname             = '';
-        $site_name            = get_bloginfo( 'name' );
-
-
-        $items = WC()->cart->get_cart();
-        $title = [];
-        foreach($items as $item) {
-            array_push($title, stripslashes($item['data']->get_name()));
-        }
-        echo '<input type="hidden" name="pledg'. $this->id . '">';
-        echo '<style>
-
-        .pledg-iframe-overlay {
-            background: transparent;
-        }
-        #payment .payment_methods li .payment_box.payment_method_'. $this->id . ' {
-            padding: 0;
-        }
-        #payment .payment_methods li .payment_box.payment_method_'. $this->id . ' iframe {
-            box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
-            border-radius: 0;
-        }
-        
-        </style>';
-        echo '<div class="containerPlegd" id="containerPlegd' . $this->id . '">';
-        echo '<div class=\'woocommerce-error\'>'.__( 'Merci de compléter vos informations personnelles', 'woocommerce-pledg' ).'</div>';
-        echo '</div>';
-        echo '<script>';
-        echo '
-        if(isFormComplete()) {
-            jQuery("#containerPlegd'.$this->id.'").html("");
-            var button = document.querySelector("label[for=\'payment_method_'.$this->id.'\']");
-            var button_order = document.querySelector("#place_order");
-
-                    var pledg'.$this->id.' = new Pledg(button, {
-                    // the Pledg merchant id
-                    merchantUid: "'.$this->get_option('merchant_id').'",
-                    // the amount **in cents** of the purchase
-                    amountCents: '.$total.',
-                    // the title of the purchase
-                    title: "'.addslashes( ($title)? implode(', ', $title) : '' ).'",
-                    // the subtitle of the purchase
-                    subtitle : "'.addslashes($site_name).'",
-                    // the currency of the purchase
-					currency : "'.get_woocommerce_currency().'",
-					// the lang of the user
-					lang : "'.get_locale().'",
-					// the country code of the user
-					country_code : jQuery("#billing_country").val(),
-					// the metadata of the purchase
-					metadata: JSON.parse("'.addslashes($this->create_metadata()).'"),
-					// the email of the user
-                    email: jQuery("#billing_email").val(),
-                    // the subtitle of the purchase
-                    // the reference of the purchase
-                    reference: "order_'.rand().'",
-                    // the name of the customer (optional, to improve anti-fraud)
-                    firstName: jQuery("#billing_first_name").val(),
-                    lastName: jQuery("#billing_last_name").val(),
-                    phoneNumber: jQuery("#billing_phone").val(),
-                    containerElement: document.querySelector("#containerPlegd'.$this->id.'"),
-                    // the shipping address (optional, to improve anti-fraud)
-                    address: {
-                        street:  jQuery("#billing_address_1").val() + " " + jQuery("#billing_address_2").val(),
-                        city: jQuery("#billing_city").val(),
-                        zipcode: jQuery("#billing_postcode").val(),
-                        stateProvince: "",
-                        country: jQuery("#billing_country").val()
-                    },
-                    shippingAddress: {
-						street:  jQuery("#shipping_address_1").val() + " " + jQuery("#shipping_address_2").val(),
-                        city: jQuery("#shipping_city").val(),
-                        zipcode: jQuery("#shipping_postcode").val(),
-                        stateProvince: "",
-                        country: jQuery("#shipping_country").val()
-					},
-                    externalCheckoutValidation: true,
-                    showCloseButton: false,
-                    onCheckoutFormStatusChange: function(readiness){
-                        button_order.disabled = !readiness;
-                    },
-                    // the function which triggers the payment
-                    onSuccess: function (resultpayment) {console.log(resultpayment);
-                        if (resultpayment.purchase === undefined) {
-                            jQuery(\'input[name="pledg'. $this->id . '"]\').val(resultpayment.uid);
-                        } else {
-                            jQuery(\'input[name="pledg'. $this->id . '"]\').val(resultpayment.purchase.reference);
-                        }
-                        
-                        jQuery(\'form[name="checkout"]\').submit();
-                    },
-                    // the function which can be used to handle the errors
-                    onError: function (error) {
-                        // see the "Errors" section for more a detailed explanation
-                        button_order.disabled = true;
-                    },
-                    onOpen: function() {
-                        jQuery("#containerPlegd'.$this->id.' .pledg-iframe-wrapper").show();
-                        console.log(jQuery("#containerPlegd'.$this->id.' .pledg-iframe-wrapper"));
-                        button_order.disabled = true;
-                        button_order.type = "button";
-                    }
-                });
-        }';
-        echo '</script>';
-    }
-
+    /**
+     * Function to declare admin options
+     */
     public function init_form_fields(){
 
-        $this->form_fields = array(
-            'enabled' => array(
-                'title'       => 'Activer/Désactiver',
-                'label'       => 'Activer Pledg',
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'no'
-            ),
-            'mode' => array(
-                'title'       => 'Mode développement/Mode production',
-                'label'       => 'Mode production',
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'no'
-            ),
-            'title' => array(
-                'title'       => 'Titre',
-                'type'        => 'text',
-                'default'     => '',
-                'desc_tip'    => true,
-            ),
-            'merchant_id' => array(
-                'title'       => 'Merchant ID',
-                'type'        => 'text',
-                'default'     => '',
-                'desc_tip'    => true,
-            ),
-            'description' => array(
-                'title'       => 'Description',
-                'type'        => 'textarea',
+        $lang = $this->langs;
+
+        
+        $a_titles = array(
+            'title_lang' => array(
+                'title'       => __('Title lang', 'woocommerce-pledg'),
+                'type'        => 'select',
+                'options'     => $lang,
+                'default'     => 'en',
+            )
+        );
+        $a_descriptions = array(
+            'description_lang' => array(
+                'title'       => __('Description lang', 'woocommerce-pledg'),
+                'type'        => 'select',
+                'options'     => $lang,
+                'default'     => 'en',
+            )
+        );
+
+        foreach ($lang as $key=>$value){
+            $a_titles = array_merge($a_titles,
+                array(
+                    ('title_' . $value) => array(
+                        'title'       => __('Title', 'woocommerce-pledg') . ' (' . $value . ')',
+                        'type'        => 'text',
+                        'default'     => '',
+                    )
+                )
+            );
+            $a_descriptions = array_merge($a_descriptions,
+                array(
+                    ('description_' . $value) => array(
+                        'title'       => __('Description', 'woocommerce-pledg') . ' (' . $value . ')',
+                        'type'        => 'text',
+                        'default'     => '',
+                    )
+                )
+            );
+        }
+
+        $this->form_fields = array_merge(
+            array(
+                'enabled' => array(
+                    'title'       => __('Activate/Deactivate', 'woocommerce-pledg'),
+                    'label'       => __('Activate Pledg', 'woocommerce-pledg'),
+                    'type'        => 'checkbox',
+                    'description' => '',
+                    'default'     => 'no'
+                ),
+                'mode' => array(
+                    'title'       => __('Sandbox mode/Production Mode', 'woocommerce-pledg'),
+                    'label'       => __('Production Mode', 'woocommerce-pledg'),
+                    'type'        => 'checkbox',
+                    'description' => '',
+                    'default'     => 'no'
+                ),
+                'merchant_id' => array(
+                    'title'       => __('Merchant ID', 'woocommerce-pledg'),
+                    'type'        => 'text',
+                    'default'     => '',
+                ),
+                'secret_key' => array(
+                    'title'       => __('Secret Key', 'woocommerce-pledg'),
+                    'type'        => 'text',
+                    'default'     => '',
+                )),
+            $a_titles,
+            $a_descriptions,
+            array(
+                'minAmount' => array(
+                    'title'       => __('Order minimum amount', 'woocommerce-pledg'),
+                    'type'        => 'number',
+                    'desc'        => true,
+                    'desc_tip'    => __('Minimum transaction amount, zero does not define a minimum', 'woocommerce-pledg'),
+                    'default'     => 0
+                ),
+                'maxAmount' => array(
+                    'title'       => __('Order maximum amount', 'woocommerce-pledg'),
+                    'type'        => 'number',
+                    'desc'        => true,
+                    'desc_tip'    => __('Maximum transaction amount, zero does not define a maximum', 'woocommerce-pledg'),
+                    'default'     => 0
+                ),
+                'logo' => array(
+                    'title'       => __('Logo', 'woocommerce-pledg'),
+                    'type'        => 'text',
+                    'desc'        => true,
+                    'desc_tip'    => __('Logo to show next to payment method. Click on the input box to add an image or keep blank for default image.', 'woocommerce-pledg'),
+                    'default'     => ''
+                )
             )
         );
 
     }
 
+    /**
+     * Function called once button "Place order" has been called
+     * Redirecting to Pledg front
+     */
     public function process_payment( $order_id ) {
-
-        global $woocommerce;
-
-        $pledg_url = ( ($this->get_option( 'mode' ) == 'yes' )? 'https://front.ecard.pledg.co' : 'https://staging.front.ecard.pledg.co' );
-
         $order = wc_get_order( $order_id );
-
-        if (isset($_POST['pledg'. $this->id]) && !empty($_POST['pledg'. $this->id])) {
-
-            $order->payment_complete($_POST['pledg'. $this->id]);
-
-            return array(
-                'result' 	=> 'success',
-                'redirect'	=> $this->get_return_url( $order )
-            );
-        }
-
         return array(
-            'result'   => 'fail',
-            'redirect' => '',
+            'result' 	=> 'success',
+            'redirect'	=> $this->get_request_url( $order )
         );
 
     }
 
-    public function payment_scripts() {
-
-        if ( ! is_cart() && ! is_checkout() && ! isset( $_GET['pay_for_order'] ) ) {
-            return;
+    /**
+     * Function to manage the creation of the url to Pledg Front
+     * redirectUrl : URL redirected by Pledg once payment has succeeded
+     * cancelUrl : URL redirected by Pledg when payment has been canceled
+     * paymentNotificationUrl : Webhook used by Pledg to update the payment status
+     */
+    public function get_request_url(WC_Order $order)
+    {
+        $endpoint = (($this->get_option( 'mode' ) == 'yes' )? 'https://front.ecard.pledg.co/purchase?' : 'https://staging.front.ecard.pledg.co/purchase?' );
+        $items = $order->get_items();
+        $id = $order->get_id();
+        $title = [];
+        foreach($items as $item) {
+            array_push($title, stripslashes($item->get_name()));
         }
 
-        // if our payment gateway is disabled, we do not have to enqueue JS too
-        if ( 'no' === $this->enabled ) {
-            return;
+        $ref = "Pledg_" . $order->get_id() . "_" . time();
+        $args =
+            array(
+                'merchantUid'       => $this->get_option('merchant_id'),
+                'amountCents'       => intval($order->get_total() * 100),
+                'title'             => addslashes( ($title)? implode(', ', $title) : '' ), 
+                'subtitle'          => addslashes(get_bloginfo( 'name' )),
+                'currency'          => get_woocommerce_currency(),
+                'lang'              => get_locale(),
+                'showCloseButton'   => true,
+                'countryCode'       => $order->get_billing_country(), 
+                'metadata'          => ($this->create_metadata()),
+                'email'             => $order->get_billing_email(),
+                'reference'         => $ref,
+                'firstName'         => $order->get_billing_first_name(),
+                'lastName'          => $order->get_billing_last_name(),
+                'phoneNumber'       => $order->get_billing_phone(),
+                'address'           => array(
+                    'street'            => $order->get_billing_address_1(),
+                    'city'              => $order->get_billing_city(),
+                    'zipcode'           => $order->get_billing_postcode(),
+                    'stateProvince'     => "",
+                    'country'           => $order->get_billing_country(),
+                ),
+                'shippingAddress'   => array(
+                    'street'            => $order->get_shipping_address_1(),
+                    'city'              => $order->get_shipping_city(),
+                    'zipcode'           => $order->get_shipping_postcode(),
+                    'stateProvince'     => "",
+                    'country'           => $order->get_shipping_country(),
+                ),
+                'redirectUrl'        => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ),
+                'cancelUrl' => esc_url_raw( $order->get_cancel_order_url_raw(wc_get_checkout_url()) ),
+                'paymentNotificationUrl' => esc_url_raw( WC_Webhook_REST_Controller::get_order_webhook_from_id($id) ),
+            );
+
+        if(empty($this->get_option( 'secret_key' ))){
+            return $endpoint . http_build_query( $args, '', '&' );
         }
-
-        // no reason to enqueue JavaScript if API keys are not set
-        if ( empty( $this->get_option('merchant_id') ) ) {
-            return;
+        else{
+            $signature = $this->JWT_sign(array('data'=>$args), $this->get_option( 'secret_key' ));
+            return $endpoint . $signature;
         }
-
-        if ($this->get_option( 'mode' ) == 'yes') {
-            wp_enqueue_script( 'pledg_js' . $this->id, 'https://s3-eu-west-1.amazonaws.com/pledg-assets/ecard-plugin/master/plugin.min.js' );
-        } else {
-            wp_enqueue_script( 'pledg_js' . $this->id, 'https://s3-eu-west-1.amazonaws.com/pledg-assets/ecard-plugin/staging/plugin.min.js' );
-        }
-
-
-        wp_register_script( 'woocommerce_pledg', plugins_url( 'assets/js/pledg.js', __DIR__ . '/../../../'), array( 'jquery', 'pledg_js' . $this->id ) );
-        wp_enqueue_script( 'woocommerce_pledg');
     }
 
+    /**
+     * Function to JWT sign the payload.
+     */
+    public function JWT_sign($args, $secret){
+        $signature = 'signature='.JWT::encode($args, $secret);
+        return $signature;
+    }
+
+    /**
+     * Returns either the locale in WP settings if avalaible in Pledg API
+     * or fr_FR otherwise (list can be managed in the main plugin file)
+     * NOT USED
+     */
+    public function get_available_locale()
+    {
+        $locale = get_locale();
+        if(in_array($locale, ['de_DE', 'en_GB', 'es_ES', 'fr_FR', 'it_IT', 'nl_NL'])){
+            return $locale;
+        }
+        return 'fr_FR';
+    }
+
+    /**
+     * Returns either the currency in WC settings if avalaible in Pledg API
+     * or EUR otherwise (list can be managed in the main plugin file)
+     * NOT USED
+     */
+    public function get_available_currency()
+    {
+        $currency = get_woocommerce_currency();
+        if(in_array($currency, ['EUR', 'GBP', 'CZK', 'NZD'])){
+            return $currency;
+        }
+        return 'EUR';
+    }
+
+
+    public function is_available(){
+        if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > 0 && $this->get_order_total() < $this->min_amount) {
+            return false;
+        }
+        return parent::is_available();
+    }
 }
