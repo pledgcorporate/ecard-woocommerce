@@ -64,8 +64,8 @@ class WC_Webhook_REST_Controller extends WP_REST_Controller {
 	public function check_response(WP_REST_Request $request){
 		$case = $this->get_case($request->get_params());
 		
-		if(!$case){
-			$data = [ 'state' => 'Error' ];
+		if( is_array($case) && $case['error'] == true){
+			$data = [ 'state' => 'Error', 'message' => $case['message'] ];
 			$html = 403;
 		}
 		else {
@@ -109,7 +109,7 @@ class WC_Webhook_REST_Controller extends WP_REST_Controller {
 				$html = 200;
 			}
 			else {
-				$data = [	'state' => 'Error' ];
+				$data = [	'state' => 'Error', 'message' => 'Decoding the message thrown an error.' ];
 				$html = 403;
 			}
 		}
@@ -136,8 +136,9 @@ class WC_Webhook_REST_Controller extends WP_REST_Controller {
 		$order = wc_get_order( $params['getId'] );
 		if(!$order)
 		{
-			$logger->error( __('Webhook called but getId didn\'t match any order : ', 'woocommerce-pledg').json_encode($params), array( 'source' => 'pledg_woocommerce_webhook' ) );
-			return false;
+			$msg = __('Webhook called but getId didn\'t match any order : ', 'woocommerce-pledg').json_encode($params) ;
+			$logger->error( $msg, array( 'source' => 'pledg_woocommerce_webhook' ) );
+			return array( 'error' => true, 'message' => $msg );
 		}
 
 		// we check that there is a reference
@@ -149,16 +150,18 @@ class WC_Webhook_REST_Controller extends WP_REST_Controller {
 				$logger->info( __('Webhook called in the case of a signed transfer.', 'woocommerce-pledg'), array( 'source' => 'pledg_woocommerce_webhook' ) );
 				return $this::CASE_SIGNED_TRANSFER;
 			}
-			$logger->error( __('Webhook called but there was no reference : ', 'woocommerce-pledg').json_encode($params), array( 'source' => 'pledg_woocommerce_webhook' ) );
-			return false;
+			$msg = __('Webhook called but there was no reference : ', 'woocommerce-pledg').json_encode($params) ;
+			$logger->error( $msg, array( 'source' => 'pledg_woocommerce_webhook' ) );
+			return array( 'error' => true, 'message' => $msg );
 		}
 		$order_id = $this->get_ID_from_reference($params['reference']);
 		
 		// we check that the reference posted is equal to the getId
 		if($order_id != $params['getId'])
 		{
-			$logger->error( __('Webhook called but the reference didn\'t match the getId (wrong webhook called with this payload) : ', 'woocommerce-pledg') . $order_id . " " .json_encode($params), array( 'source' => 'pledg_woocommerce_webhook' ) );
-			return false;
+			$msg = __('Webhook called but the reference didn\'t match the getId (wrong webhook called with this payload) : ', 'woocommerce-pledg') . $order_id . " " .json_encode($params) ;
+			$logger->error( $msg, array( 'source' => 'pledg_woocommerce_webhook' ) );
+			return array( 'error' => true, 'message' => $msg );
 		}
 
 		// if there is a signature we're in the case of a back
@@ -171,8 +174,9 @@ class WC_Webhook_REST_Controller extends WP_REST_Controller {
 		$total = intval($order->get_total() * 100);
 		if(!isset($params['amount_cents']) || $total !=$params['amount_cents'])
 		{
-			$logger->error( __('Webhook called but amount_cents didn\'t match to order total : ', 'woocommerce-pledg').json_encode($params), array( 'source' => 'pledg_woocommerce_webhook' ) );
-			return false;
+			$msg = __('Webhook called but amount_cents didn\'t match to order total : ', 'woocommerce-pledg').json_encode($params) ;
+			$logger->error( $msg, array( 'source' => 'pledg_woocommerce_webhook' ) );
+			return array( 'error' => true, 'message' => $msg );
 		}
 		else{
 			$logger->info( __('Webhook called in the case of a unsigned transfer.', 'woocommerce-pledg'), array( 'source' => 'pledg_woocommerce_webhook' ) );
