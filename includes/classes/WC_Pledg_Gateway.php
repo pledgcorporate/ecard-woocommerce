@@ -252,13 +252,13 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                 'firstName'         => $order->get_billing_first_name(),
                 'lastName'          => $order->get_billing_last_name(),
                 'phoneNumber'       => $order->get_billing_phone(),
-                'address'           => json_encode(array(
+                'address'           => array(
                     'street'            => $order->get_billing_address_1(),
                     'city'              => $order->get_billing_city(),
                     'zipcode'           => $order->get_billing_postcode(),
                     'stateProvince'     => "",
                     'country'           => $order->get_billing_country(),
-                )),
+                ),
                 'shippingAddress'   => array(
                     'street'            => $order->get_shipping_address_1(),
                     'city'              => $order->get_shipping_city(),
