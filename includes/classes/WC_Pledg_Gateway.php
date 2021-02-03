@@ -338,9 +338,6 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
     public function payment_fields() {
         echo '<input type="hidden" name="merchantUid_'. $this->id . '" value="' . $this->get_option('merchant_id') . '"/>';
-		$description = $this->get_description();
-		if ( $description ) {
-			echo wpautop( wptexturize( $description ) );
-		}
+		parent::payment_fields();
 	}
 }
