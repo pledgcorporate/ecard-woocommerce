@@ -52,8 +52,9 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
             $this->description = $this->get_option( 'description_en' );
         }
 
-        add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-
+        if(is_checkout()){
+            add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
+        }
     }
 
     /**
@@ -245,19 +246,19 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                 'lang'              => get_locale(),
                 'showCloseButton'   => true,
                 'countryCode'       => $order->get_billing_country(), 
-                'metadata'          => ($this->create_metadata()),
+                'metadata'          => $this->create_metadata(),
                 'email'             => $order->get_billing_email(),
                 'reference'         => $ref,
                 'firstName'         => $order->get_billing_first_name(),
                 'lastName'          => $order->get_billing_last_name(),
                 'phoneNumber'       => $order->get_billing_phone(),
-                'address'           => array(
+                'address'           => json_encode(array(
                     'street'            => $order->get_billing_address_1(),
                     'city'              => $order->get_billing_city(),
                     'zipcode'           => $order->get_billing_postcode(),
                     'stateProvince'     => "",
                     'country'           => $order->get_billing_country(),
-                ),
+                )),
                 'shippingAddress'   => array(
                     'street'            => $order->get_shipping_address_1(),
                     'city'              => $order->get_shipping_city(),
@@ -271,6 +272,9 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
             );
 
         if(empty($this->get_option( 'secret_key' ))){
+            $args['metadata'] = json_encode($args['metadata']);
+            $args['address'] = json_encode($args['address']);
+            $args['shippingAddress'] = json_encode($args['shippingAddress']);
             return $endpoint . http_build_query( $args, '', '&' );
         }
         else{
@@ -322,4 +326,21 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
         }
         return parent::is_available();
     }
+
+    public function payment_scripts(){
+        global $pledg_payment_scripts;
+        if(!isset($pledg_payment_scripts)){
+            $pledg_payment_scripts = true;
+            wp_enqueue_script( 'woocommerce_pledg', WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL.'assets/js/pledg_payments.js', array('jquery'), false, true);
+            wp_enqueue_style( 'woocommerce_pledg', WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL.'assets/css/pledg_payments.css');
+        }
+    }
+
+    public function payment_fields() {
+        echo '<input type="hidden" name="merchantUid_'. $this->id . '" value="' . $this->get_option('merchant_id') . '"/>';
+		$description = $this->get_description();
+		if ( $description ) {
+			echo wpautop( wptexturize( $description ) );
+		}
+	}
 }

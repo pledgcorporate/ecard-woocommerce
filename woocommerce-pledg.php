@@ -10,7 +10,7 @@
  * Version: 2.1.2
  */
 
-
+use Firebase\JWT\JWT;
 
 define('WOOCOMMERCE_PLEDG_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL', plugin_dir_URL( __FILE__ ));
@@ -101,7 +101,7 @@ add_action('admin_enqueue_scripts', 'wc_pledg_admin_enqueue_script');
 
 function wc_pledg_admin_enqueue_script($hook){
 	if($hook !== "woocommerce_page_wc-settings"){	return;	}
-
+	
 	// Register the script
 	wp_register_script( 'pledg_admin', WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL . '/assets/js/pledg_admin.js',  'jQuery', false, true);
 	
@@ -114,5 +114,76 @@ function wc_pledg_admin_enqueue_script($hook){
 	
 	// Enqueued script with localized data.
 	wp_enqueue_script( 'pledg_admin' );
+	
+}
 
+add_filter('woocommerce_order_cancelled_notice', 'cancel_order_notice', 10);
+add_filter('woocommerce_order_cancelled_notice_type', 'cancel_order_notice_type', 10);
+
+/**
+ * Add a custom notice to notify that the order has been canceled due to "msg" reason
+ * Mark it as error type as well
+ * But check that the type of pledg_error is not 'abandonment' (cancel case, should be typed as notice)
+ */
+function cancel_order_notice($initArg){
+	if (
+		isset($_GET['cancel_order']) &&
+		isset($_GET['order']) &&
+		isset($_GET['order_id']) &&
+		isset($_GET['pledg_error']) &&
+		(isset($_GET['_wpnonce']) && wp_verify_nonce(wp_unslash($_GET['_wpnonce']), 'woocommerce-cancel_order')) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		) {
+			$logger = wc_get_logger();
+			$order = wc_get_order($_GET['order_id']);
+			$pledg_error = json_decode( stripslashes($_GET['pledg_error']));
+			if( property_exists($pledg_error, 'signature') ){
+				try{
+					$secret = WC()->payment_gateways->payment_gateways()[$order->get_payment_method()]->get_option( 'secret_key' );
+					$error_msg = JWT::decode($pledg_error->signature, $secret, array('HS256')	);
+					$cancel = ($error_msg->error->type === "abandonment") ;
+					$error_msg = $error_msg->error->message;
+				} catch (Exception $e) {
+					$cancel = false;
+					$error_msg = __('Unknown error : '.$e->getMessage(), 'woocommerce-pledg');
+				}
+			}
+			else{
+				$cancel = ($pledg_error->type === "abandonment") ;
+				$error_msg = $pledg_error->message;
+			}
+			$logger->error('Pledg Error (Id : '. $order->get_id().') : '. $error_msg, array('source' => 'pledg_woocommerce_webhook'));
+			$order->add_order_note('Pledg Error : '. $error_msg);
+			if($cancel){
+				return $initArg;
+			}
+			return $error_msg;
+		}
+}
+function cancel_order_notice_type($initArg){
+	if (
+		isset($_GET['cancel_order']) &&
+		isset($_GET['order']) &&
+		isset($_GET['order_id']) &&
+		isset($_GET['pledg_error']) &&
+		(isset($_GET['_wpnonce']) && wp_verify_nonce(wp_unslash($_GET['_wpnonce']), 'woocommerce-cancel_order')) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		) {
+			$order = wc_get_order($_GET['order_id']);
+			$pledg_error = json_decode( stripslashes($_GET['pledg_error']));
+			if( property_exists($pledg_error, 'signature') ){
+				try{
+					$secret = WC()->payment_gateways->payment_gateways()[$order->get_payment_method()]->get_option( 'secret_key' );
+					$error_msg = JWT::decode($pledg_error->signature, $secret, array('HS256')	);
+					$cancel = ($error_msg->error->type === "abandonment") ;
+				} catch (Exception $e) {
+					$cancel = false;
+				}
+			}
+			else{
+				$cancel = ($pledg_error->type === "abandonment") ;
+			}
+			if($cancel){
+				return $initArg;
+			}
+			return 'error';
+		}
 }
