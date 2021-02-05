@@ -7,13 +7,13 @@
         elem.addEventListener("change", function(event) {
           var item = event.target;
           if(item.value.match(regex)){
-            payment_detail(item);
+            // payment_detail(item);
           }
         });
       });
       var el = document.querySelector('input[name="payment_method"]:checked');
       if(el && el.value.match(regex)){
-        payment_detail(el);
+        // payment_detail(el);
       }
     });
 
