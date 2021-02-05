@@ -52,6 +52,8 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
             $this->description = $this->get_option( 'description_en' );
         }
 
+        add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+
         if(is_checkout()){
             add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
         }
