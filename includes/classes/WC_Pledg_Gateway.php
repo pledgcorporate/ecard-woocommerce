@@ -340,6 +340,42 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
     public function payment_fields() {
         echo '<input type="hidden" name="merchantUid_'. $this->id . '" value="' . $this->get_option('merchant_id') . '"/>';
+        echo '<input type="hidden" name="payment_detail_trad_'. $this->id . '" value=\''. $this->payment_detail_trad(substr(get_locale(), 0, 2), get_woocommerce_currency_symbol()) .'\'/>';
+        echo '<input type="hidden" name="locale_'. $this->id . '" value=\''. str_replace("_", "-", get_locale()) .'\'/>';
+        $urlApi = [ 'payload'=>[
+            'created' => date("Y-m-d"),
+            'amount_cents' => $this->get_order_total()*100
+        ]];
+        $urlApi['url'] = (($this->get_option( 'mode' ) == 'yes' )? 'https://back.ecard.pledg.co/api/users/me/merchants/' : 'https://staging.back.ecard.pledg.co/api/users/me/merchants/' );
+        $urlApi['url'] .= $this->get_option('merchant_id');
+        $urlApi['url'] .="/simulate_payment_schedule";
+        echo '<input type="hidden" name="url_api_'. $this->id . '" value=\''. json_encode($urlApi) .'\'/>';
 		parent::payment_fields();
 	}
+
+    public function payment_detail_trad($lang, $currency){
+		$availableLangs = ['en', 'fr'];
+		if(!in_array($lang, $availableLangs)){
+			$lang = $availableLangs[0];
+		}
+		$traductions = [
+			'en' => [
+				'currencySign' => 'before',
+				'deadline' => 'Deadline',
+				'the' => 'the',
+				'fees' => '(including %s of fees)',
+				'deferred' => 'I\'ll pay %s1 on %s2.',
+			],
+			'fr' => [
+				'currencySign' => 'after',
+                'deadline' => 'Echéance',
+				'the' => 'le',
+				'fees' => '(dont %s de frais)',
+				'deferred' => 'Je paierai %s1 le %s2.',
+			],
+		];
+        $ret = $traductions[$lang];
+        $ret['currency'] = $currency;
+	    return json_encode($ret);
+    }
 }
