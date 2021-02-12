@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 /*
  * Plugin Name: Woocommerce Pledg
