@@ -340,7 +340,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
     public function payment_fields() {
         echo '<input type="hidden" name="merchantUid_'. $this->id . '" value="' . $this->get_option('merchant_id') . '"/>';
-        echo '<input type="hidden" name="payment_detail_trad_'. $this->id . '" value=\''. $this->payment_detail_trad(substr(get_locale(), 0, 2), get_woocommerce_currency_symbol()) .'\'/>';
+        echo '<input type="hidden" name="payment_detail_trad_'. $this->id . '" value="'. esc_html($this->payment_detail_trad(substr(get_locale(), 0, 2), get_woocommerce_currency_symbol())) .'"/>';
         echo '<input type="hidden" name="locale_'. $this->id . '" value=\''. str_replace("_", "-", get_locale()) .'\'/>';
         $urlApi = [ 'payload'=>[
             'created' => date("Y-m-d"),
