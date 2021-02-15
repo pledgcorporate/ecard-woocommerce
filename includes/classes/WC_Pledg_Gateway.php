@@ -85,19 +85,24 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 			}
 			
 			// Products
+			$md_products_count = 0;
 			$md_products = [];
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				$md_product = [];
-				
-				$product =  wc_get_product( $cart_item['data']->get_id());
-				$md_product['reference'] = $product->get_id();
-				$md_product['type'] = $product->get_virtual() == false ? 'physical' : 'virtual';
-				$md_product['quantity'] = $cart_item['quantity'];
-				$md_product['name'] = $product->get_name();
-				$md_product['unit_amount_cents'] = intval($cart_item['data']->get_price() * 100);
-				$md_product['category'] = '';
-				$md_product['slug'] = $product->get_slug();
-				array_push($md_products, $md_product);
+				// Limit export to the first 5 products (JWT signature can be too long otherwise)
+				if ($md_products_count < 5) {
+					$md_product = [];
+					
+					$product =  wc_get_product( $cart_item['data']->get_id());
+					$md_product['reference'] = $product->get_id();
+					$md_product['type'] = $product->get_virtual() == false ? 'physical' : 'virtual';
+					$md_product['quantity'] = $cart_item['quantity'];
+					$md_product['name'] = $product->get_name();
+					$md_product['unit_amount_cents'] = intval($cart_item['data']->get_price() * 100);
+					$md_product['category'] = '';
+					$md_product['slug'] = $product->get_slug();
+					array_push($md_products, $md_product);
+					$md_products_count++;
+				}
 			}
 			$metadata['products'] = $md_products;
 		}
