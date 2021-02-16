@@ -354,10 +354,6 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 	}
 
     public function payment_detail_trad($lang, $currency){
-		$availableLangs = ['en', 'fr'];
-		if(!in_array($lang, $availableLangs)){
-			$lang = $availableLangs[0];
-		}
 		$traductions = [
 			'en' => [
 				'currencySign' => 'before',
@@ -374,7 +370,20 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 				'deferred' => 'Je paierai %s1 le %s2.',
 			],
 		];
-        $ret = $traductions[$lang];
+
+        $ret = [
+            /* translators: Has the currency sign to be before or after the amount to pay (€1 or 1€), after by default. */
+            'currencySign' => __('Currency symbol ("before" or "after")', 'woocommerce-pledg'),
+            'deadline' => __('Deadline', 'woocommerce-pledg'),
+            'the' => __('the', 'woocommerce-pledg'),
+            /* translators: %s: Will be replaced by the amount of fees (including currency symbol). */
+            'fees' => __('(including %s of fees)', 'woocommerce-pledg'),
+            /* translators: %s1: amount payed (inc. currency symbol), %s2: date of payment. */
+            'deferred' => __('I\'ll pay %s1 on %s2.', 'woocommerce-pledg'),
+        ];
+        if($ret['currencySign'] !== "before" && $ret['currencySign'] !== "after"){
+            $ret['currencySign'] = "after";
+        }
         $ret['currency'] = $currency;
 	    return json_encode($ret);
     }

@@ -7,7 +7,7 @@
  * Plugin URI: https://pledg.co
  * Description: Instalment payment, simple and accessible.
  * Author URI: https://fougeras.me
- * Version: 2.2.2
+ * Version: 2.2.3
  */
 
 use Firebase\JWT\JWT;

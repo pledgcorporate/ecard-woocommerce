@@ -47,6 +47,9 @@ Even though SSL is always recommended, this plugin does not required SSL to work
 
 == Changelog ==
 
+= 2.2 =
+* API call to display deadlines and fees on the checkout page.
+
 = 2.1 =
 * Cancel URL has been modified to redirect to checkout page.
 * Can translate title and description of payments in defined languages.
