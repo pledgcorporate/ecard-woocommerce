@@ -378,6 +378,34 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 				'fees' => '(dont %s de frais)',
 				'deferred' => 'Je paierai %s1 le %s2.',
 			],
+			'es' => [
+				'currencySign' => 'after',
+                'deadline' => 'Debido',
+				'the' => 'a',
+				'fees' => '(incluyendo %s de tarifas)',
+				'deferred' => 'Pagaré %s1 el %s2.',
+			],
+			'it' => [
+				'currencySign' => 'after',
+                'deadline' => 'Rata',
+				'the' => 'in data',
+				'fees' => '(di cui %s di commissioni)',
+				'deferred' => 'Pagherò %s1 il %s2.',
+			],
+			'de' => [
+				'currencySign' => 'after',
+                'deadline' => 'Fällig',
+				'the' => 'am',
+				'fees' => '(einschließlich %s der Gebühren)',
+				'deferred' => 'Ich werde %s1 am %s2 bezahlen.',
+			],
+			'nl' => [
+				'currencySign' => 'after',
+                'deadline' => 'Verschuldigd',
+				'the' => 'op',
+				'fees' => '(inclusief %s vergoedingen)',
+				'deferred' => 'Ik betaal %s1 op %s2.',
+			],
 		];
         $ret = $traductions[$lang];
         $ret['currency'] = $currency;
