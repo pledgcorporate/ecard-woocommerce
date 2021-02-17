@@ -1,25 +1,25 @@
 # Copyright (C) 2021 Lucas Fougeras
-# This file is distributed under the same license as the WooCommerce Pledg plugin.
+# This file is distributed under the same license as the Woocommerce Pledg plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Pledg 2.0.0\n"
+"Project-Id-Version: Woocommerce Pledg 2.2.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-"
 "pledg\n"
-"POT-Creation-Date: 2021-02-16T09:02:57+00:00\n"
-"PO-Revision-Date: 2021-02-16 10:10+0100\n"
-"Last-Translator: \n"
 "Language-Team: \n"
-"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-02-16T09:02:57+00:00\n"
+"PO-Revision-Date: 2021-02-16 10:17+0100\n"
 "X-Generator: Poedit 2.4.2\n"
 "X-Domain: woocommerce-pledg\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en_GB\n"
 
 #. Plugin Name of the plugin
 msgid "Woocommerce Pledg"
-msgstr "WooCommerce Pledg"
+msgstr "Woocommerce Pledg"
 
 #. Plugin URI of the plugin
 msgid "https://pledg.co"
@@ -28,7 +28,7 @@ msgstr "https://pledg.co"
 #. Description of the plugin
 #: includes/classes/WC_Pledg_Gateway.php:38
 msgid "Instalment payment, simple and accessible."
-msgstr "Le paiement en plusieurs fois, simple et accessible."
+msgstr "Instalment payment, simple and accessible."
 
 #. Author of the plugin
 msgid "Lucas Fougeras"
@@ -40,7 +40,7 @@ msgstr "https://fougeras.me"
 
 #: includes/classes/WC_Pledg_Gateway.php:120
 msgid "Title lang"
-msgstr "Titre"
+msgstr "Title"
 
 #: includes/classes/WC_Pledg_Gateway.php:128
 msgid "Description lang"
@@ -48,7 +48,7 @@ msgstr "Description"
 
 #: includes/classes/WC_Pledg_Gateway.php:139
 msgid "Title"
-msgstr "Titre"
+msgstr "Title"
 
 #: includes/classes/WC_Pledg_Gateway.php:148
 msgid "Description"
@@ -56,19 +56,19 @@ msgstr "Description"
 
 #: includes/classes/WC_Pledg_Gateway.php:159
 msgid "Activate/Deactivate"
-msgstr "Activer / Désactiver"
+msgstr "Activate/Deactivate"
 
 #: includes/classes/WC_Pledg_Gateway.php:160
 msgid "Activate Pledg"
-msgstr "Activer Pledg"
+msgstr "Activate Pledg"
 
 #: includes/classes/WC_Pledg_Gateway.php:166
 msgid "Sandbox mode/Production Mode"
-msgstr "Mode de développement / Mode de production"
+msgstr "Sandbox mode/Production Mode"
 
 #: includes/classes/WC_Pledg_Gateway.php:167
 msgid "Production Mode"
-msgstr "Mode de production"
+msgstr "Production Mode"
 
 #: includes/classes/WC_Pledg_Gateway.php:173
 msgid "Merchant ID"
@@ -80,19 +80,19 @@ msgstr "Secret Key"
 
 #: includes/classes/WC_Pledg_Gateway.php:186
 msgid "Order minimum amount"
-msgstr "Montant minimum de commande"
+msgstr "Order minimum amount"
 
 #: includes/classes/WC_Pledg_Gateway.php:189
 msgid "Minimum transaction amount, zero does not define a minimum"
-msgstr "Laisser vide ou 0 pour ne pas mettre de minimum de commande"
+msgstr "Minimum transaction amount, zero does not define a minimum"
 
 #: includes/classes/WC_Pledg_Gateway.php:193
 msgid "Order maximum amount"
-msgstr "Montant maximum de commande"
+msgstr "Order maximum amount"
 
 #: includes/classes/WC_Pledg_Gateway.php:196
 msgid "Maximum transaction amount, zero does not define a maximum"
-msgstr "Laisser vide ou 0 pour ne pas mettre de maximum de commande"
+msgstr "Maximum transaction amount, zero does not define a maximum"
 
 #: includes/classes/WC_Pledg_Gateway.php:200
 msgid "Logo"
@@ -103,47 +103,47 @@ msgid ""
 "Logo to show next to payment method. Click on the input box to add an image "
 "or keep blank for default image."
 msgstr ""
-"Logo à afficher à côté du mode de paiement. Cliquer sur le champ pour "
-"ajouter une image ou laisser vide pour mettre l\\’image par défaut."
+"Logo to show next to payment method. Click on the input box to add an image "
+"or keep blank for default image."
 
 #. translators: Has the currency sign to be before or after the amount to pay (€1 or 1€), after by default.
 #: includes/classes/WC_Pledg_Gateway.php:376
 msgid "Currency symbol (\"before\" or \"after\")"
-msgstr "After"
+msgstr "before"
 
 #: includes/classes/WC_Pledg_Gateway.php:377
 msgid "Deadline"
-msgstr "Echéance"
+msgstr "Deadline"
 
 #: includes/classes/WC_Pledg_Gateway.php:378
 msgid "the"
-msgstr "le"
+msgstr "the"
 
 #. translators: %s: Will be replaced by the amount of fees (including currency symbol).
 #: includes/classes/WC_Pledg_Gateway.php:380
 msgid "(including %s of fees)"
-msgstr "(dont %s de frais)"
+msgstr "(including %s of fees)"
 
 #. translators: %s1: amount payed (inc. currency symbol), %s2: date of payment.
 #: includes/classes/WC_Pledg_Gateway.php:382
 msgid "I'll pay %s1 on %s2."
-msgstr "Je paierai %s1 le %s2."
+msgstr "I'll pay %s1 on %s2."
 
 #: includes/classes/WC_Pledg_REST_Controller.php:98
 msgid "Pledg has notified this order as paid."
-msgstr "Pledg a marqué cette commande comme payée."
+msgstr "Pledg has notified this order as paid."
 
 #: includes/classes/WC_Pledg_REST_Controller.php:139
 msgid "Webhook called but getId didn't match any order : "
-msgstr "Webhook appelé mais le getId ne correspond à aucune commande : "
+msgstr "Webhook called but getId didn't match any order : "
 
 #: includes/classes/WC_Pledg_REST_Controller.php:150
 msgid "Webhook called in the case of a signed transfer."
-msgstr "Webhook appelé dans le cas d’un transfert signé."
+msgstr "Webhook called in the case of a signed transfer."
 
 #: includes/classes/WC_Pledg_REST_Controller.php:153
 msgid "Webhook called but there was no reference : "
-msgstr "Webhook appelé mais il manque la référence : "
+msgstr "Webhook called but there was no reference : "
 
 #: includes/classes/WC_Pledg_REST_Controller.php:162
 #: includes/classes/WC_Pledg_REST_Controller.php:250
@@ -151,36 +151,34 @@ msgid ""
 "Webhook called but the reference didn't match the getId (wrong webhook "
 "called with this payload) : "
 msgstr ""
-"Webhook appelé mais la référence ne correspond pas au getID (mauvais Webhook "
-"appelé pour ce payload) : "
+"Webhook called but the reference didn't match the getId (wrong webhook "
+"called with this payload) : "
 
 #: includes/classes/WC_Pledg_REST_Controller.php:169
 msgid "Webhook called in the case of a signed back mode."
-msgstr "Webhook appelé dans le cas d’un mode back signé."
+msgstr "Webhook called in the case of a signed back mode."
 
 #: includes/classes/WC_Pledg_REST_Controller.php:177
 #: includes/classes/WC_Pledg_REST_Controller.php:255
 msgid "Webhook called but amount_cents didn't match to order total : "
-msgstr ""
-"Webhook appelé mais le amount_cents ne correspond pas à la valeur totale de "
-"la commande : "
+msgstr "Webhook called but amount_cents didn't match to order total : "
 
 #: includes/classes/WC_Pledg_REST_Controller.php:182
 msgid "Webhook called in the case of a unsigned transfer."
-msgstr "Webhook appelé dans le cas d’un transfert non signé."
+msgstr "Webhook called in the case of a unsigned transfer."
 
 #: includes/classes/WC_Pledg_REST_Controller.php:246
 msgid "Signature could not be decoded of the order "
-msgstr "La signature n’a pas pu être décodée pour cette commande "
+msgstr "Signature could not be decoded of the order "
 
 #: woocommerce-pledg.php:110
 msgid "Set logo"
-msgstr "Enregistrer le logo"
+msgstr "Set logo"
 
 #: woocommerce-pledg.php:111
 msgid "Select logo for Pledg payment"
-msgstr "Sélectionner le logo pour ce mode de paiement Pledg"
+msgstr "Select logo for Pledg payment"
 
 #: woocommerce-pledg.php:147
 msgid "Unknown error : "
-msgstr "Erreur inconnue : "
+msgstr "Unknown error : "
