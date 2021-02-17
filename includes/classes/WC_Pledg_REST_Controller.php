@@ -251,7 +251,7 @@ class WC_Webhook_REST_Controller extends WP_REST_Controller {
 			return false;
 		}
 		$order = wc_get_order( $params['getId'] );
-		if($signatureDec->amount_cents != ($order->get_total() * 100) ){
+		if($signatureDec->amount_cents != intval($order->get_total() * 100) ){
 			$logger->error( __('Webhook called but amount_cents didn\'t match to order total : ', 'woocommerce-pledg') . json_encode($order->get_total() * 100). ' '. $signatureDec->amount_cents, array( 'source' => 'pledg_woocommerce_webhook' ) );
 			return false;
 		}
