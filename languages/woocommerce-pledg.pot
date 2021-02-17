@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Woocommerce Pledg plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Woocommerce Pledg 2.0.0\n"
+"Project-Id-Version: Woocommerce Pledg 2.2.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-pledg\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-01-21T20:00:43+00:00\n"
+"POT-Creation-Date: 2021-02-16T09:02:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: woocommerce-pledg\n"
@@ -23,7 +23,7 @@ msgid "https://pledg.co"
 msgstr ""
 
 #. Description of the plugin
-#: includes/classes/WC_Pledg_Gateway.php:33
+#: includes/classes/WC_Pledg_Gateway.php:38
 msgid "Instalment payment, simple and accessible."
 msgstr ""
 
@@ -35,60 +35,91 @@ msgstr ""
 msgid "https://fougeras.me"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:104
-msgid "Activate/Deactivate"
-msgstr ""
-
-#: includes/classes/WC_Pledg_Gateway.php:105
-msgid "Activate Pledg"
-msgstr ""
-
-#: includes/classes/WC_Pledg_Gateway.php:111
-msgid "Sandbox mode/Production Mode"
-msgstr ""
-
-#: includes/classes/WC_Pledg_Gateway.php:112
-msgid "Production Mode"
-msgstr ""
-
-#: includes/classes/WC_Pledg_Gateway.php:118
-msgid "Title"
-msgstr ""
-
-#: includes/classes/WC_Pledg_Gateway.php:123
-msgid "Merchant ID"
+#: includes/classes/WC_Pledg_Gateway.php:120
+msgid "Title lang"
 msgstr ""
 
 #: includes/classes/WC_Pledg_Gateway.php:128
-msgid "Secret Key"
+msgid "Description lang"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:133
+#: includes/classes/WC_Pledg_Gateway.php:139
+msgid "Title"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:148
 msgid "Description"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:137
+#: includes/classes/WC_Pledg_Gateway.php:159
+msgid "Activate/Deactivate"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:160
+msgid "Activate Pledg"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:166
+msgid "Sandbox mode/Production Mode"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:167
+msgid "Production Mode"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:173
+msgid "Merchant ID"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:178
+msgid "Secret Key"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:186
 msgid "Order minimum amount"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:140
+#: includes/classes/WC_Pledg_Gateway.php:189
 msgid "Minimum transaction amount, zero does not define a minimum"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:144
+#: includes/classes/WC_Pledg_Gateway.php:193
 msgid "Order maximum amount"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:147
+#: includes/classes/WC_Pledg_Gateway.php:196
 msgid "Maximum transaction amount, zero does not define a maximum"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:151
+#: includes/classes/WC_Pledg_Gateway.php:200
 msgid "Logo"
 msgstr ""
 
-#: includes/classes/WC_Pledg_Gateway.php:154
+#: includes/classes/WC_Pledg_Gateway.php:203
 msgid "Logo to show next to payment method. Click on the input box to add an image or keep blank for default image."
+msgstr ""
+
+#. translators: Has the currency sign to be before or after the amount to pay (€1 or 1€), after by default.
+#: includes/classes/WC_Pledg_Gateway.php:376
+msgid "Currency symbol (\"before\" or \"after\")"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:377
+msgid "Deadline"
+msgstr ""
+
+#: includes/classes/WC_Pledg_Gateway.php:378
+msgid "the"
+msgstr ""
+
+#. translators: %s: Will be replaced by the amount of fees (including currency symbol).
+#: includes/classes/WC_Pledg_Gateway.php:380
+msgid "(including %s of fees)"
+msgstr ""
+
+#. translators: %s1: amount payed (inc. currency symbol), %s2: date of payment.
+#: includes/classes/WC_Pledg_Gateway.php:382
+msgid "I'll pay %s1 on %s2."
 msgstr ""
 
 #: includes/classes/WC_Pledg_REST_Controller.php:98
@@ -99,33 +130,33 @@ msgstr ""
 msgid "Webhook called but getId didn't match any order : "
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:149
+#: includes/classes/WC_Pledg_REST_Controller.php:150
 msgid "Webhook called in the case of a signed transfer."
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:152
+#: includes/classes/WC_Pledg_REST_Controller.php:153
 msgid "Webhook called but there was no reference : "
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:160
-#: includes/classes/WC_Pledg_REST_Controller.php:246
+#: includes/classes/WC_Pledg_REST_Controller.php:162
+#: includes/classes/WC_Pledg_REST_Controller.php:250
 msgid "Webhook called but the reference didn't match the getId (wrong webhook called with this payload) : "
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:166
+#: includes/classes/WC_Pledg_REST_Controller.php:169
 msgid "Webhook called in the case of a signed back mode."
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:174
-#: includes/classes/WC_Pledg_REST_Controller.php:251
+#: includes/classes/WC_Pledg_REST_Controller.php:177
+#: includes/classes/WC_Pledg_REST_Controller.php:255
 msgid "Webhook called but amount_cents didn't match to order total : "
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:178
+#: includes/classes/WC_Pledg_REST_Controller.php:182
 msgid "Webhook called in the case of a unsigned transfer."
 msgstr ""
 
-#: includes/classes/WC_Pledg_REST_Controller.php:242
+#: includes/classes/WC_Pledg_REST_Controller.php:246
 msgid "Signature could not be decoded of the order "
 msgstr ""
 
@@ -135,4 +166,8 @@ msgstr ""
 
 #: woocommerce-pledg.php:111
 msgid "Select logo for Pledg payment"
+msgstr ""
+
+#: woocommerce-pledg.php:147
+msgid "Unknown error : "
 msgstr ""

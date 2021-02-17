@@ -48,7 +48,7 @@ Even though SSL is always recommended, this plugin does not required SSL to work
 == Changelog ==
 
 = 2.2 =
-* Add Installment and deferred repayment schedule on checkoutpage
+* API call to display deadlines and fees on the checkout page.
 
 = 2.1 =
 * Cancel URL has been modified to redirect to checkout page.
