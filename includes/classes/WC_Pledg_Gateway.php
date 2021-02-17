@@ -85,11 +85,11 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 			}
 			
 			// Products
-			$md_products_count = 0;
 			$md_products = [];
+			$md_products_count = 0;
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
 				// Limit export to the first 5 products (JWT signature can be too long otherwise)
-				if ($md_products_count < 5) {
+				if ($md_products_count < 5) {					
 					$md_product = [];
 					
 					$product =  wc_get_product( $cart_item['data']->get_id());
@@ -359,55 +359,19 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 	}
 
     public function payment_detail_trad($lang, $currency){
-		$availableLangs = ['en', 'fr'];
-		if(!in_array($lang, $availableLangs)){
-			$lang = $availableLangs[0];
-		}
-		$traductions = [
-			'en' => [
-				'currencySign' => 'before',
-				'deadline' => 'Deadline',
-				'the' => 'the',
-				'fees' => '(including %s of fees)',
-				'deferred' => 'I\'ll pay %s1 on %s2.',
-			],
-			'fr' => [
-				'currencySign' => 'after',
-                'deadline' => 'Echéance',
-				'the' => 'le',
-				'fees' => '(dont %s de frais)',
-				'deferred' => 'Je paierai %s1 le %s2.',
-			],
-			'es' => [
-				'currencySign' => 'after',
-                'deadline' => 'Debido',
-				'the' => 'a',
-				'fees' => '(incluyendo %s de tarifas)',
-				'deferred' => 'Pagaré %s1 el %s2.',
-			],
-			'it' => [
-				'currencySign' => 'after',
-                'deadline' => 'Rata',
-				'the' => 'in data',
-				'fees' => '(di cui %s di commissioni)',
-				'deferred' => 'Pagherò %s1 il %s2.',
-			],
-			'de' => [
-				'currencySign' => 'after',
-                'deadline' => 'Fällig',
-				'the' => 'am',
-				'fees' => '(einschließlich %s der Gebühren)',
-				'deferred' => 'Ich werde %s1 am %s2 bezahlen.',
-			],
-			'nl' => [
-				'currencySign' => 'after',
-                'deadline' => 'Verschuldigd',
-				'the' => 'op',
-				'fees' => '(inclusief %s vergoedingen)',
-				'deferred' => 'Ik betaal %s1 op %s2.',
-			],
-		];
-        $ret = $traductions[$lang];
+        $ret = [
+            /* translators: Has the currency sign to be before or after the amount to pay (€1 or 1€), after by default. */
+            'currencySign' => __('Currency symbol ("before" or "after")', 'woocommerce-pledg'),
+            'deadline' => __('Deadline', 'woocommerce-pledg'),
+            'the' => __('the', 'woocommerce-pledg'),
+            /* translators: %s: Will be replaced by the amount of fees (including currency symbol). */
+            'fees' => __('(including %s of fees)', 'woocommerce-pledg'),
+            /* translators: %s1: amount payed (inc. currency symbol), %s2: date of payment. */
+            'deferred' => __('I\'ll pay %s1 on %s2.', 'woocommerce-pledg'),
+        ];
+        if($ret['currencySign'] !== "before" && $ret['currencySign'] !== "after"){
+            $ret['currencySign'] = "after";
+        }
         $ret['currency'] = $currency;
 	    return json_encode($ret);
     }
