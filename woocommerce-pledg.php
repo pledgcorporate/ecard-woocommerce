@@ -18,7 +18,7 @@ define('WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL', plugin_dir_URL( __FILE__ ));
 /**
  * Load dynamically the textdomain (will work even if the plugin dir name has been changed)
  */
-preg_match('/wp-content\/plugins\/([a-zA-Z0-9\-]+)\//', WOOCOMMERCE_PLEDG_PLUGIN_DIR, $s);
+preg_match('/wp-content\/plugins\/([a-zA-Z0-9\-_]+)\//', WOOCOMMERCE_PLEDG_PLUGIN_DIR, $s);
 load_plugin_textdomain( 'woocommerce-pledg', false, $s[1].'/languages');
 
 /*
