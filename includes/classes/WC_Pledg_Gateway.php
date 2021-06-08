@@ -68,7 +68,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 		try
 		{
 			// Delivery
-			foreach ( WC()->cart->get_shipping_packages() as $package_id => $package ) {
+			foreach ( WC()->cart->get_shippig_packages() as $package_id => $package ) {
 				// Check if a shipping for the current package exist
 				if ( WC()->session->__isset( 'shipping_for_package_'.$package_id ) ) {
 					// Loop through shipping rates for the current package
@@ -105,6 +105,15 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 				}
 			}
 			$metadata['products'] = $md_products;
+        
+			// account
+            $customerId =  get_current_user_id();
+
+			$md_account = [];
+            $user_data = get_userdata($customerId);
+			$md_account['created'] = $user_data->user_registered;
+			$md_account['count'] = wc_get_customer_order_count($customerId);
+			$metadata['account'] = $md_account;
 		}
 		catch (Exception $exp) {
 			wc_get_logger()->error( 'pledg_create_metadata - exception : '.$exp->getMessage(), array( 'source' => 'pledg_woocommerce' ) );
