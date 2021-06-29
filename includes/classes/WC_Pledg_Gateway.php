@@ -32,6 +32,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
     public function __construct() {
         $this->icon = ($this->get_option( 'logo' )==='') ? WOOCOMMERCE_PLEDG_PLUGIN_DIR_URL . 'logo.jpg' : $this->get_option( 'logo' ) ;
         $this->has_fields = true;
+	$this->country = $this->get_option('country');
         $this->min_amount = $this->get_option('minAmount');
         $this->max_amount = $this->get_option('maxAmount');
         $this->method_title = 'Pledg';
@@ -208,6 +209,13 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
                     'desc_tip'    => __('Logo to show next to payment method. Click on the input box to add an image or keep blank for default image.', 'woocommerce-pledg'),
                     'default'     => ''
                 )
+		'country' => array(
+                    'title'       => __('country', 'woocommerce-pledg'),
+                    'type'        => 'text',
+                    'desc'        => true,
+                    'desc_tip'    => __('Country, the payment method is displayed only if the shipping country is the same.', 'woocommerce-pledg'),
+                    'default'     => ''
+                )
             )
         );
 
@@ -328,7 +336,7 @@ class WC_Pledg_Gateway extends WC_Payment_Gateway {
 
 
     public function is_available(){
-        if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > 0 && $this->get_order_total() < $this->min_amount) {
+        if (WC()->cart && 0 < $this->get_order_total() && $this->min_amount > 0 && $this->get_order_total() < $this->min_amount && $order->get_shipping_country()!=country) {
             return false;
         }
         return parent::is_available();
